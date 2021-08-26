@@ -1,3 +1,5 @@
+#Test Change
+
 class dictionary_entry:
     def __init__(self,hir,kan,com,jlp,mea,cla):
         self.hiragana = hir
