@@ -15,15 +15,15 @@ class Application(tk.Frame):
     def create_widgets(self):
         self.url = tk.Entry(self)
         self.url.grid(row=0,column=1, pady=10)
-
-        self.submit = tk.Button(self, text="Submit", command=self.submit)
+        self.url.bind("<Return>", func=self.submit)
+        self.submit = tk.Button(self, text="Submit", command=partial(self.submit,))
         self.submit.grid(row=1,column=1, padx=20,pady=20)
 
-    def submit(self):
+    def submit(self, event):
         entries = parse_search(search(self.url.get()))
 
         for entry in range(5):
-            frame = tk.LabelFrame(self, text=f"{entries[entry].kanji}・{entries[entry].hiragana}", pady=1,padx=5)
+            frame = tk.LabelFrame(self, text=f"{entries[entry].kanji}・{entries[entry].hiragana}・{entries[entry].classes}", pady=1,padx=5)
             frame.grid(row=entry+3, column=1, pady=10,padx=30)
             
             def_ = tk.Label(frame, text="Definition")
@@ -32,7 +32,7 @@ class Application(tk.Frame):
             text = tk.Text(frame, width=100, height=5, wrap=WORD, yscrollcommand=True)
             text.insert(INSERT, entries[entry].meanings)
             text.grid(row=2, column=0)
-    
+            
         
 
 root = tk.Tk()
