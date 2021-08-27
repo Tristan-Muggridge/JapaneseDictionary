@@ -15,9 +15,8 @@ def profile(fnc):
         sortby = "cumulative"
         ps=pstats.Stats(pr, stream=s).sort_stats(sortby)
         ps.print_stats()
-        f = open("debug.txt", "a")
-        f.write(s.getvalue())
-        f.close()
+        with open("debug.txt", "a") as f:
+            f.write(s.getvalue())
         return retval
     return inner
 
