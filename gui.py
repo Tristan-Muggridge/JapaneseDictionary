@@ -4,6 +4,7 @@ from functions import *
 from classes import *
 from fetcher import *
 from functools import partial
+import requests
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -20,7 +21,7 @@ class Application(tk.Frame):
         self.submit.grid(row=1,column=1, padx=20,pady=20)
 
     def submit(self, event):
-        entries = parse_search(search(self.url.get()))
+        entries = parse_search(search(session, self.url.get()))
 
         for entry in range(5):
             frame = tk.LabelFrame(self, text=f"{entries[entry].kanji}・{entries[entry].hiragana}・{entries[entry].classes}", pady=1,padx=5)
@@ -34,7 +35,7 @@ class Application(tk.Frame):
             text.grid(row=2, column=0)
             
         
-
+session = requests.session()
 root = tk.Tk()
 root.geometry("1920x1080")
 root.title("凄い辞書")

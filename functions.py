@@ -1,26 +1,36 @@
 #-- Community Libraries --#
+from profile import Profile
 import requests as r
 from bs4 import BeautifulSoup as bs
+import cProfile, pstats, io
 from classes import *
 
+def profile(fnc):
+    def inner(*args, **kwargs):
+        pr = cProfile.Profile()
+        pr.enable()
+        retval = fnc(*args, **kwargs)
+        pr.disable
+        s = io.StringIO()
+        sortby = "cumulative"
+        ps=pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        f = open("debug.txt", "a")
+        f.write(s.getvalue())
+        f.close()
+        return retval
+    return inner
 
 def get_meanings(soup):
     meanings = soup.find_all("span", class_="meaning-meaning")
-    string = ""
-    counter = 1
-    for meaning in meanings:
-        string += f"{counter}. {meaning.text.strip()}"
-        counter+=1
-        string += ", \n" if counter <= len(meanings) else ""
-    return f"{string}"
+    list_ = list(map(lambda x : x.text.strip(), meanings))
+    output = ", \n".join(list_)
+    return output
 
 def JSON(entries):
     output = "{\n\t\"entries\":[\n"
-    counter = 0
-    for entry in entries:
-        output += entry.JSON()
-        counter+=1
-        output += ",\n" if counter < len(entries) else ""
+    list_ = list(map(lambda x : x.JSON(), entries))
+    output = ",\n".join(list_)
     return f"{output}\n\t]\n}}"
 
 def get_furigana(soups):
@@ -53,9 +63,9 @@ def get_classes(soup):
         classes = ""
     return classes
 
-def search(query):
+def search(session, query):
     url = f"https://www.jisho.org/search/{query}"
-    page = r.get(url)
+    page = session.get(url)
     soups = bs(page.content, "html.parser")
     soups = soups.find(id="primary")
     return soups.find_all("div", class_="concept_light clearfix")

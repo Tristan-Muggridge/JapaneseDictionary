@@ -5,7 +5,7 @@ class dictionary_entry:
         self.common = com
         self.jlpt = jlp
         self.meanings = mea
-        self.classes = self.class_parser(cla)
+        self.classes = cla
 
     def JSON(self):
         return f"\t{{\n\t\t\"Hiragana\": \"{self.hiragana}\", \
@@ -14,12 +14,3 @@ class dictionary_entry:
             \n\t\t\"JLPT\": \"{self.jlpt}\", \
             \n\t\t\"Meanings\": \"{self.meanings}\", \
             \n\t\t\"Class(es)\": \"{self.classes}\"\n\t}}"
-
-    def class_parser(self, str_):
-        try:
-            output = ""
-            for x in str_.split(','):
-                output += f"{x}, "
-            return output[0:-2]
-        except:
-            return ""
