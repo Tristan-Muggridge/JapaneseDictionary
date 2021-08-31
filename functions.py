@@ -1,9 +1,11 @@
-#-- Community Libraries --#
-from profile import Profile
+# -- Community Libraries --#
 import requests as r
-from bs4 import BeautifulSoup as bs
 import cProfile, pstats, io
+from profile import Profile
+from bs4 import BeautifulSoup as bs
+from requests.sessions import session
 from classes import *
+
 
 def profile(fnc):
     def inner(*args, **kwargs):
@@ -13,40 +15,49 @@ def profile(fnc):
         pr.disable
         s = io.StringIO()
         sortby = "cumulative"
-        ps=pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
         ps.print_stats()
         with open("debug.txt", "a") as f:
             f.write(s.getvalue())
         return retval
+
     return inner
+
 
 def get_meanings(soup):
     meanings = soup.find_all("span", class_="meaning-meaning")
-    list_ = list(map(lambda x : x.text.strip(), meanings))
+    list_ = list(map(lambda x: x.text.strip(), meanings))
     output = ", \n".join(list_)
     return output
 
+
 def JSON(entries):
-    output = "{\n\t\"entries\":[\n"
-    list_ = list(map(lambda x : x.JSON(), entries))
+    output = '{\n\t"entries":[\n'
+    list_ = list(map(lambda x: x.JSON(), entries))
     output = ",\n".join(list_)
     return f"{output}\n\t]\n}}"
 
+
 def get_furigana(soups):
-        furiganas = soups.find_all("span", class_="furigana")
-        for furigana in furiganas:
-            return furigana.text.strip()
+    furiganas = soups.find_all("span", class_="furigana")
+    for furigana in furiganas:
+        return furigana.text.strip()
+
 
 def get_kanji(soups):
-    kanji = soups.find("span", class_="text").text
-    return kanji.strip()
+    kanji = soups.find("span", class_="text").text.strip()
+    return kanji
+
 
 def get_common(soup):
     try:
-        common = soup.find("span", class_="concept_light-tag concept_light-common success label").text.strip()
+        common = soup.find(
+            "span", class_="concept_light-tag concept_light-common success label"
+        ).text.strip()
     except:
         common = "nope"
     return True if common == "Common word" else False
+
 
 def get_jlpt(soup):
     try:
@@ -55,12 +66,14 @@ def get_jlpt(soup):
         jlpt = ""
     return jlpt
 
+
 def get_classes(soup):
     try:
         classes = soup.find("div", class_="meaning-tags").text.strip()
     except:
         classes = ""
     return classes
+
 
 def search(session, query):
     url = f"https://www.jisho.org/search/{query}"
@@ -69,17 +82,24 @@ def search(session, query):
     soups = soups.find(id="primary")
     return soups.find_all("div", class_="concept_light clearfix")
 
-def parse_search(soups):
-    entries = [] #define empty list
 
-    for soup in soups: #for each html div from above, create dictionary_entry, add to empty entries list
-        entries.append(dictionary_entry(
-            get_furigana(soup),
-            get_kanji(soup),
-            get_common(soup),
-            get_jlpt(soup),
-            get_meanings(soup),
-            get_classes(soup)
-        ))
-    
+def parse_search(soups):
+    entries = []  # define empty list
+
+    for (
+        soup
+    ) in (
+        soups
+    ):  # for each html div from above, create dictionary_entry, add to empty entries list
+        entries.append(
+            DictionaryEntry(
+                get_furigana(soup),
+                get_kanji(soup),
+                get_common(soup),
+                get_jlpt(soup),
+                get_meanings(soup),
+                get_classes(soup),
+            )
+        )
+
     return entries
